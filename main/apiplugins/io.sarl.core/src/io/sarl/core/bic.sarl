@@ -491,7 +491,7 @@ capacity Schedules {
 	def every(task : AgentTask = null, period : long, procedure : (Agent) => void ) : AgentTask
 
 	/**
-	 * Schedule a single-execution task.
+	 * Schedule a periodic execution task.
 	 *
 	 * <p>If the duration of the task is greater to the given delay length, then
 	 * no multiple task's instance are run in parallel, in opposite to the

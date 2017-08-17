@@ -206,6 +206,59 @@ public class JanusConfigTest extends AbstractJanusTest {
 		assertEquals(JanusConfig.class, v);
 	}
 
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_number() {
+		System.setProperty("janus.unit.test.enum", Integer.toString(234)); //$NON-NLS-1$
+		assertEquals(234, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_undefined() {
+		assertEquals(Thread.NORM_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_invalidValue() {
+		System.setProperty("janus.unit.test.enum", "XXX"); //$NON-NLS-1$
+		assertEquals(Thread.NORM_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_low_01() {
+		System.setProperty("janus.unit.test.enum", "LOW"); //$NON-NLS-1$
+		assertEquals(Thread.MIN_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_low_02() {
+		System.setProperty("janus.unit.test.enum", "Low"); //$NON-NLS-1$
+		assertEquals(Thread.MIN_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_normal_01() {
+		System.setProperty("janus.unit.test.enum", "NORMAL"); //$NON-NLS-1$
+		assertEquals(Thread.NORM_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_normal_02() {
+		System.setProperty("janus.unit.test.enum", "Normal"); //$NON-NLS-1$
+		assertEquals(Thread.NORM_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_high_01() {
+		System.setProperty("janus.unit.test.enum", "HIGH"); //$NON-NLS-1$
+		assertEquals(Thread.MAX_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
+	@Test
+	public void testGetSystemPropertyAsThreadPriority_high_02() {
+		System.setProperty("janus.unit.test.enum", "High"); //$NON-NLS-1$
+		assertEquals(Thread.MAX_PRIORITY, JanusConfig.getSystemPropertyAsThreadPriority("janus.unit.test.enum"));
+	}
+
 	/**
 	 * @author $Author: sgalland$
 	 * @version $FullVersion$

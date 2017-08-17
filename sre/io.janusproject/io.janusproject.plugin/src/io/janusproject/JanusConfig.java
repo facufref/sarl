@@ -23,6 +23,8 @@ package io.janusproject;
 
 import java.util.Properties;
 
+import com.google.common.base.Strings;
+
 import io.janusproject.modules.StandardJanusPlatformModule;
 import io.janusproject.modules.hazelcast.HazelcastKernelLoggerFactory;
 
@@ -163,6 +165,52 @@ public final class JanusConfig {
     public static final String PUB_URI = "network.pub.uri"; //$NON-NLS-1$
 
     /**
+     * Name of the property that indicates the default priority for the threads.
+     *
+     * @see #DEFAULT_THREAD_PRIORITY_VALUE
+     */
+    public static final String DEFAULT_THREAD_PRIORITY_NAME = "janus.executors.threads.defaultPriority"; //$NON-NLS-1$
+
+    /** High priority for threads.
+     */
+    public static final String DEFAULT_THREAD_PRIORITY_HIGH_CONSTANT = "HIGH"; //$NON-NLS-1$
+
+    /** Normal priority for threads.
+     */
+    public static final String DEFAULT_THREAD_PRIORITY_NORMAL_CONSTANT = "NORMAL"; //$NON-NLS-1$
+
+    /** Low priority for threads.
+     */
+    public static final String DEFAULT_THREAD_PRIORITY_LOW_CONSTANT = "LOW"; //$NON-NLS-1$
+
+    /**
+     * Indicates the default priority for the threads.
+     * The value could be: <ul>
+     * <li>"HIGH" for higher priority,</li>
+     * <li>"NORMAL" for normal priority,</li>
+     * <li>"LOW" for lower priority,</li>
+     * <li>an integer number that corresponds to the priority level.</li>
+     * </ul>
+     *
+     * @see #DEFAULT_THREAD_PRIORITY_NAME
+     */
+    public static final String DEFAULT_THREAD_PRIORITY_VALUE = DEFAULT_THREAD_PRIORITY_LOW_CONSTANT;
+
+    /**
+     * Name of the property that indicates if the rejected tasks are tracked.
+     *
+     * @see #REJECTED_TASK_TRACKING_VALUE
+     */
+    public static final String REJECTED_TASK_TRACKING_NAME = "janus.executors.threads.logRejected"; //$NON-NLS-1$
+
+    /**
+     * Indicates if the rejected tasks are tracked.
+     *
+     * @see #REJECTED_TASK_TRACKING_NAME
+     */
+    public static final Boolean REJECTED_TASK_TRACKING_VALUE = Boolean.FALSE;
+
+    /**
      * Name of the property that contains the maximal number of threads in the pool.
      *
      * @see #MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE
@@ -198,11 +246,12 @@ public final class JanusConfig {
     public static final String THREAD_KEEP_ALIVE_DURATION_NAME = "janus.executors.threads.keepAliveDuration"; //$NON-NLS-1$
 
     /**
-     * Indicates the duration for keeping the iddle threads alive (in seconds).
+     * Indicates the duration for keeping the idle threads alive (in seconds).
      *
+     * <p>By default, the value is 60 seconds, as defined in the JDK's cached thread pool.
      * @since 2.0.5.0
      */
-    public static final int THREAD_KEEP_ALIVE_DURATION_VALUE = 0;
+    public static final int THREAD_KEEP_ALIVE_DURATION_VALUE = 60;
 
     /**
      * Name of the property that contains the numbers of seconds that the kernel is waiting for thread terminations before timeout.
@@ -281,6 +330,8 @@ public final class JanusConfig {
         defaultValues.put(RANDOM_DEFAULT_CONTEXT_ID_NAME, RANDOM_DEFAULT_CONTEXT_ID_VALUE.toString());
         defaultValues.put(VERBOSE_LEVEL_NAME, VERBOSE_LEVEL_VALUE);
         defaultValues.put(HAZELCAST_LOGGER_FACTORY_NAME, HAZELCAST_LOGGER_FACTORY_VALUE);
+        defaultValues.put(DEFAULT_THREAD_PRIORITY_NAME, DEFAULT_THREAD_PRIORITY_VALUE.toString());
+        defaultValues.put(REJECTED_TASK_TRACKING_NAME, REJECTED_TASK_TRACKING_VALUE.toString());
         defaultValues.put(MIN_NUMBER_OF_THREADS_IN_EXECUTOR_NAME, Integer.toString(MIN_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
         defaultValues.put(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_NAME, Integer.toString(MAX_NUMBER_OF_THREADS_IN_EXECUTOR_VALUE));
         defaultValues.put(KERNEL_THREAD_TIMEOUT_NAME, Integer.toString(KERNEL_THREAD_TIMEOUT_VALUE));
@@ -619,6 +670,41 @@ public final class JanusConfig {
             }
         }
         return null;
+    }
+
+
+    /**
+     * Replies the priority level for the threads.
+     *
+     * @param name
+     *            - name of the property.
+     * @return the priority.
+     */
+    public static int getSystemPropertyAsThreadPriority(String name) {
+    	String strValue = getSystemProperty(name);
+    	if (Strings.isNullOrEmpty(strValue)) {
+    		strValue = DEFAULT_THREAD_PRIORITY_VALUE;
+    	}
+    	if (strValue != null && !strValue.isEmpty()) {
+    		switch (strValue.toUpperCase()) {
+    		case DEFAULT_THREAD_PRIORITY_NORMAL_CONSTANT:
+    			return Thread.NORM_PRIORITY;
+    		case DEFAULT_THREAD_PRIORITY_HIGH_CONSTANT:
+    			return Thread.MAX_PRIORITY;
+    		case DEFAULT_THREAD_PRIORITY_LOW_CONSTANT:
+    			return Thread.MIN_PRIORITY;
+    		default:
+    			try {
+    				final int value = Integer.valueOf(strValue);
+    				if (value >= 0) {
+    					return value;
+    				}
+    			} catch (Throwable exception) {
+    				//
+    			}
+    		}
+    	}
+    	return Thread.NORM_PRIORITY;
     }
 
 }
